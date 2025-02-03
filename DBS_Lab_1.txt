@@ -1,0 +1,23 @@
+1)create table employee(emp_no INT primary key, emp_name varchar(20), emp_address varchar(50));
+
+2)insert into employee values(101, 'Alice Johnson','123 Main Street,New York,NY');
+  insert into employee values(102, 'Bob','MANIPAL');
+  insert into employee values(103,'Charlie','MANGALORE');
+  insert into employee values(104,'David White','Houtson');
+  insert into employee values(105,'Emma','Secacus Town,NJ');
+
+3)select emp_name from employee;
+
+4)select * from employee where emp_address='MANIPAL';
+5) alter table employee add salary numeric(7,2);
+
+6)update employee set salary=50000 where emp_no=101;
+  update employee set salary=70000 where emp_no=102;
+  update employee set salary=8000 where emp_no=103; 
+  update employee set salary=90000 where emp_no=104;
+  update employee set salary=30000 where emp_no=105;
+
+7)desc employee;
+8)delete from employee where emp_address='MANGALORE';
+9)rename employee to employee1;
+10)drop table employee1
