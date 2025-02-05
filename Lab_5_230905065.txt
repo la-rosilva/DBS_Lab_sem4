@@ -27,6 +27,20 @@ _on w on p.pnumber=w.pno group by p.pname,p.pnumber having count(w.essn)>2;
 13)select d.dnumber,count(e.ssn) from department d join employee e on d.dnumber=e.dno group by d.dnumber having count(e.ssn)>5 and sum(e.salary
 )>40000;
 
+________________________________________________________________________________________________
+ADDITIONAL EXERCISES:
+________________________________________________________________________________________________
+1) select e.fname from employee e where not exists ((select p.pnumber from project p where p.dnum=5) except (select w.pno from works_on w where
+ w.essn=e.ssn));
+
+2)select distinct(e.fname) from employee e,employee t,department d
+ where e.salary>t.salary and d.dname='Research'; OR select e.fname from employee e where e.salary >some(select e.salary from employee e,department d where e.dno=d.dnumber and d.dname='Research
+');
+
+
+3)select count(distinct(e.ssn)) from employee e, works_on w, project p where e.ssn=w.essn and w.pno=p.pnumber and p.pname='ProductX' ;
+
+
 
 
 
