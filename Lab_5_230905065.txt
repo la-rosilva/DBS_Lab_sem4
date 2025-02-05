@@ -19,6 +19,14 @@ ARTMENT.DNAME,EMPLOYEE.FNAME,EMPLOYEE.LNAME;
 9)select fname from employee,department where employee.ssn=department.mgr_ssn and department.mgr_ssn in(select essn from dependent);
 10) select SUM(salary), max(salary),min(salary),avg(salary) from employee;
 
+11) select p.pnumber, p.pname,count(w.essn) from project p join works_on w on p.pnumber=w.pno group by p.pnumber,p.pname;
+
+12)select p.pname,p.pnumber,count(w.essn) from project p join works
+_on w on p.pnumber=w.pno group by p.pname,p.pnumber having count(w.essn)>2;
+
+13)select d.dnumber,count(e.ssn) from department d join employee e on d.dnumber=e.dno group by d.dnumber having count(e.ssn)>5 and sum(e.salary
+)>40000;
+
 
 
 
