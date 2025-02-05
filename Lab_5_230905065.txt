@@ -1,0 +1,26 @@
+1)select Bdate, Address from EMPLOYEE where Fname='John' and Minit='B' and Lname='Smith';
+   select Fname,Minit,Lname from EMPLOYEE,DEPARTMENT where EMPLOYEE.DNO=DEPARTMENT.DNUMBER and  DEPARTMENT.DNAME='Research';
+
+2)select PROJECT.PNAME,EMPLOYEE.DNO,EMPLOYEE.LNAME,EMPLOYEE.ADDRESS,EMPLOYEE.BDATE from PROJECT,EMPLOYEE,DEPARTMENT where PROJECT.PLOCATION='Starfford' and EMPLOYEE.SSN=DEPARTMENT.MGR_SSN and PROJECT.D
+NUM=DEPARTMENT.DNUMBER;
+
+3) select E.FNAME,E.LNAME,T.FNAME,T.LNAME from EMPLOYEE E,EMPLOYEE T where E.SSN=T.SUPER_SSN;
+4)  select PNO from EMPLOYEE e left outer join WORKS_ON w on w.ESSN=e.SSN and e.LNAME='Smith';
+
+(ask Sap)
+5) select FNAME, ESSN,SALARY*1.10 new_sal from WORKS_ON,EMPLOYEE,PROJECT where WORKS_ON.ESSN=EMPLOYE
+E.SSN and PROJECT.PNAME='ProductX' and PROJECT.PNUMBER=WORKS_ON.PNO;
+
+6)select EMPLOYEE.FNAME,P.PNAME,DEPARTMENT.DNAME from EMPLOYEE,PROJECT P,WORKS_ON,DEPARTMENT where EMPLOYEE.SSN=WORKS_ON.ESSN and P.PNUMBER=WORKS_ON.PNO and EMPLOYEE.DNO=DEPARTMENT.DNUMBER order by DEP
+ARTMENT.DNAME,EMPLOYEE.FNAME,EMPLOYEE.LNAME;
+
+7)select fname from employee,dependent where fname=dependent_name and employee.sex=dependent.sex;
+8) select fname,ssn from employee where ssn not in (select essn from dependent);
+9)select fname from employee,department where employee.ssn=department.mgr_ssn and department.mgr_ssn in(select essn from dependent);
+10) select SUM(salary), max(salary),min(salary),avg(salary) from employee;
+
+
+
+
+
+
