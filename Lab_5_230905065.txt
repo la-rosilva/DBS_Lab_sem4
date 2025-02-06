@@ -5,9 +5,8 @@
 NUM=DEPARTMENT.DNUMBER;
 
 3) select E.FNAME,E.LNAME,T.FNAME,T.LNAME from EMPLOYEE E,EMPLOYEE T where E.SSN=T.SUPER_SSN;
-4)  select PNO from EMPLOYEE e left outer join WORKS_ON w on w.ESSN=e.SSN and e.LNAME='Smith';
+4) (select p.pnumber from project p, employee e, department d, works_on w where p.pnumber=w.pno and e.ssn=w.essn and p.dnum=d.dnumber and e.lname='Smith')union(select p.pnumber from project p, employee e, department d, works_on w where p.pnumber=w.pno and d.mgr_ssn=e.ssn and p.dnum=d.dnumber and e.lname='Smith');
 
-(ask Sap)
 5) select FNAME, ESSN,SALARY*1.10 new_sal from WORKS_ON,EMPLOYEE,PROJECT where WORKS_ON.ESSN=EMPLOYE
 E.SSN and PROJECT.PNAME='ProductX' and PROJECT.PNUMBER=WORKS_ON.PNO;
 
