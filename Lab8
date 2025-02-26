@@ -1,0 +1,62 @@
+1)DECLARE
+  instructor_id instructor.ID%TYPE;   
+  cur_salary instructor.salary%TYPE; 
+  raised_amt instructor.salary%TYPE;  
+
+  
+  CURSOR c1 IS
+    SELECT ID, salary
+    FROM instructor
+    FOR UPDATE OF salary;  
+
+BEGIN
+  
+  OPEN c1;
+  
+  
+  LOOP
+    
+    FETCH c1 INTO instructor_id, cur_salary;  
+    EXIT WHEN c1%NOTFOUND;  
+
+    
+    raised_amt := cur_salary * 0.05;
+
+    
+    UPDATE instructor
+    SET salary = salary * 1.05
+    WHERE CURRENT OF c1;  
+    
+   
+    INSERT INTO salary_raise(ID, raise_date, raised_amt)
+    VALUES (instructor_id, SYSDATE, raised_amt);  
+
+  END LOOP;
+
+
+  DBMS_OUTPUT.PUT_LINE('Salary raise successfully applied for all instructors.');
+
+ 
+  CLOSE c1;
+
+END;
+/
+
+2) declare
+    vid student.ID%type;
+    vname student.name%type;
+    vdept_name student.dept_name%type;
+    vtot_cred student.tot_cred%type;
+   
+    cursor c1 is select ID,name,dept_name,tot_cred from student order by tot_cred ASC;
+    begin
+    open c1;
+    loop
+    fetch c1 into vid,vname,vdept_name,vtot_cred;
+    exit when c1%notfound or c1%rowcount>=11;
+    dbms_output.put_line('ID:'|| vid||',Name:'||vname||',Department:'||vdept_name||', Total Credits: '||vtot_cred);
+   end loop;
+   close c1;
+ end;
+/
+
