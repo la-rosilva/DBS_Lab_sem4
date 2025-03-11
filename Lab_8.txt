@@ -60,3 +60,226 @@ END;
  end;
 /
 
+3)SET SERVEROUTPUT ON;
+
+DECLARE
+    CURSOR c IS 
+        SELECT t.course_id, t.sec_id, t.semester, t.year, t.id AS instructor_id,
+               c.title, c.dept_name, c.credits, 
+               i.name AS instructor_name, 
+               s.building, s.room_number, s.time_slot_id,
+               (SELECT COUNT(*) FROM takes tk
+                WHERE tk.course_id = t.course_id 
+                  AND tk.sec_id = t.sec_id 
+                  AND tk.semester = t.semester 
+                  AND tk.year = t.year) AS tot_student_no
+        FROM teaches t
+        LEFT JOIN course c ON t.course_id = c.course_id
+        LEFT JOIN instructor i ON t.id = i.id
+        LEFT JOIN section s ON t.course_id = s.course_id 
+                           AND t.sec_id = s.sec_id 
+                           AND t.semester = s.semester 
+                           AND t.year = s.year;
+
+    instructor_name instructor.name%TYPE;
+    building section.building%TYPE;
+    room_number section.room_number%TYPE;
+    time_slot_id section.time_slot_id%TYPE;
+    
+BEGIN
+    FOR rec IN c LOOP
+        IF rec.instructor_name IS NULL THEN
+            instructor_name := 'Unknown Instructor';
+        ELSE
+            instructor_name := rec.instructor_name;
+        END IF;
+
+        IF rec.building IS NULL THEN
+            building := 'N/A';
+        ELSE
+            building := rec.building;
+        END IF;
+
+        IF rec.room_number IS NULL THEN
+            room_number := 'N/A';
+        ELSE
+            room_number := rec.room_number;
+        END IF;
+
+        IF rec.time_slot_id IS NULL THEN
+            time_slot_id := 'N/A';
+        ELSE
+            time_slot_id := rec.time_slot_id;
+        END IF;
+
+        DBMS_OUTPUT.PUT_LINE('Course ID: ' || rec.course_id || 
+                             ' Title: ' || rec.title || 
+                             ' Dept name: ' || rec.dept_name || 
+                             ' Credits: ' || rec.credits || 
+                             ' Instructor name: ' || instructor_name || 
+                             ' Building: ' || building || 
+                             ' Room number: ' || room_number || 
+                             ' Time slot id: ' || time_slot_id || 
+                             ' Total students enrolled: ' || rec.tot_student_no || chr(10));
+    END LOOP;
+END;
+/
+
+
+4) DECLARE
+  
+        CURSOR student_cursor IS
+            SELECT T.ID, S.name, S.tot_cred
+            FROM Takes T
+            JOIN Student S ON T.ID = S.ID
+            WHERE T.course_id = 'CS-101';
+  
+        v_count NUMBER := 0;  -- Variable to track students in CS-101
+       v_deregistered NUMBER := 0; -- Variable to track deregistered students
+ 
+   BEGIN
+       DBMS_OUTPUT.PUT_LINE('Students enrolled in CS-101:');
+ 
+       -- Iterate through all students taking CS-101
+       FOR rec IN student_cursor LOOP
+           v_count := v_count + 1; -- Count students
+ 
+           DBMS_OUTPUT.PUT_LINE('Student ID: ' || rec.ID || ', Name: ' || rec.name || ', Total Credits: ' || rec.tot_cred);
+ 
+           -- Check if the student has less than 30 credits
+           IF rec.tot_cred < 30 THEN
+               -- Delete the student from Takes
+               DELETE FROM Takes WHERE ID = rec.ID AND course_id = 'CS-101';
+ 
+              
+               v_deregistered := v_deregistered + 1;
+ 
+               DBMS_OUTPUT.PUT_LINE('>> Deregistered Student ID: ' || rec.ID);
+           END IF;
+       END LOOP;
+ 
+       -- If no students were found in CS-101
+       IF v_count = 0 THEN
+           DBMS_OUTPUT.PUT_LINE('No students found in CS-101.');
+       ELSIF v_deregistered = 0 THEN
+           DBMS_OUTPUT.PUT_LINE('No students were deregistered (all have 30+ credits).');
+
+    END IF;
+ 
+ 
+    END;
+   /
+
+5)ALTER TABLE studentable MODIFY LetterGrade VARCHAR2(2) DEFAULT 'F';
+UPDATE studentable SET LetterGrade = 'F';
+COMMIT;
+
+SET SERVEROUTPUT ON;
+
+DECLARE
+    -- Cursor with FOR UPDATE to allow modification
+    CURSOR c IS 
+        SELECT rollno, gpa, LetterGrade 
+        FROM studentable 
+        FOR UPDATE;  
+
+    v_grade studentable.LetterGrade%TYPE; -- Variable to store calculated letter grade
+
+BEGIN
+    FOR i IN c LOOP
+        -- Determine the letter grade based on GPA
+        IF i.gpa >= 9.0 THEN
+            v_grade := 'A+';
+        ELSIF i.gpa >= 8.0 THEN
+            v_grade := 'A';
+        ELSIF i.gpa >= 7.0 THEN
+            v_grade := 'B';
+        ELSIF i.gpa >= 6.0 THEN
+            v_grade := 'C';
+        ELSIF i.gpa >= 5.0 THEN
+            v_grade := 'D';
+        ELSE
+            v_grade := 'F';
+        END IF;
+
+        -- Update LetterGrade using WHERE CURRENT OF
+        UPDATE studentable 
+        SET LetterGrade = v_grade 
+        WHERE CURRENT OF c;
+
+        -- Print updated information
+        DBMS_OUTPUT.PUT_LINE('Roll No: ' || i.rollno || 
+                             ', GPA: ' || i.gpa || 
+                             ', Updated Letter Grade: ' || v_grade);
+    END LOOP;
+
+    COMMIT; -- Save changes
+
+END;
+/
+
+6) DECLARE
+        v_course_id Course.course_id%TYPE;
+        v_count NUMBER := 0; -- Counter variable
+  
+        CURSOR instructor_cursor (p_course_id Course.course_id%TYPE) IS
+            SELECT I.ID, I.name
+            FROM Instructor I
+            JOIN Teaches T ON I.ID = T.ID
+            WHERE T.course_id = p_course_id;
+ 
+   BEGIN
+       v_course_id := '&Enter_Course_ID';
+ 
+       FOR rec IN instructor_cursor(v_course_id) LOOP
+           v_count := v_count + 1;
+           DBMS_OUTPUT.PUT_LINE('Instructor ID: ' || rec.ID || ', Name: ' || rec.name);
+       END LOOP;
+ 
+       IF v_count = 0 THEN
+           DBMS_OUTPUT.PUT_LINE('No instructors found for course ' || v_course_id);
+       END IF;
+ 
+   END
+/
+
+
+7) DECLARE
+       
+        CURSOR student_cursor IS
+            SELECT DISTINCT S.ID, S.name AS student_name, I.name AS advisor_name
+            FROM Student S
+          JOIN Advisor A ON S.ID = A.s_id
+            JOIN Instructor I ON A.i_id = I.ID
+            JOIN Teaches TE ON I.ID = TE.ID
+            JOIN Takes T ON S.ID = T.ID
+                         AND T.course_id = TE.course_id
+                         AND T.sec_id = TE.sec_id
+                         AND T.semester = TE.semester
+                         AND T.year = TE.year;
+ 
+       v_count NUMBER := 0; 
+ 
+   BEGIN
+      DBMS_OUTPUT.PUT_LINE('Students registered for courses taught by their advisor:');
+ 
+       -- Loop through the cursor
+       FOR rec IN student_cursor LOOP
+           v_count := v_count + 1;  -- Increment count
+           DBMS_OUTPUT.PUT_LINE('Student ID: ' || rec.ID || ', Name: ' || rec.student_name ||
+                                ', Advisor: ' || rec.advisor_name);
+       END LOOP;
+
+       -- If no students found
+       IF v_count = 0 THEN
+           DBMS_OUTPUT.PUT_LINE('No students found.');
+       END IF;
+ 
+   END;
+   /
+Students registered for courses taught by their advisor:
+Student ID: 12345, Name: Shankar, Advisor: Srinivasan
+Student ID: 44553, Name: Peltier, Advisor: Einstein
+Student ID: 98988, Name: Tanaka, Advisor: Crick
+Student ID: 76653, Name: Aoi, Advisor: Kim
+
