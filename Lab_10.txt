@@ -1,0 +1,148 @@
+                           
+
+create table log_change_takes(Time_Of_Change TIMESTAMP, ID varchar2(5), Courseid varchar2(8), sec_id 
+varchar2(8), semester varchar2(6), year number(4), grade char(1));
+
+1)create or replace trigger log_changes_takes_trigger
+after insert or update or delete on takes for each row
+begin
+if inserting then
+insert into log_change_takes values(SYSDATE,:NEW.ID,:NEW.Course_id,:NEW.sec_id,:NEW.semester,:NEW.year,:NEW.grade);
+
+elsif updating then insert into log_change_takes values(SYSDATE,:NEW.ID,:NEW.Course_id,:NEW.sec_id,:NEW.semester,:NEW.year,:NEW.grade);
+
+elsif deleting then insert into log_change_takes values(SYSDATE,:OLD.ID,:OLD.Course_id,:OLD.sec_id,:OLD.semester,:OLD.year,:OLD.grade);
+end if;
+end;
+/
+
+ insert into takes values('98988', 'CS-101','1','Spring',2010,'A');
+
+TIME_OF_CHANGE
+---------------------------------------------------------------------------
+ID    COURSEID SEC_ID   SEMEST       YEAR G
+----- -------- -------- ------ ---------- -
+19-MAR-25 09.44.28.000000 AM
+98988 CS-101   1        Spring       2010 A
+
+
+
+
+2)create or replace trigger update_details_trigger
+after update on instructor for each row
+begin
+insert into Old_Data_Instructor values(:OLD.ID,:OLD.name,:OLD.dept_name,:OLD.salary);
+end;
+/
+
+update instructor set salary='93000' where ID=83821;
+
+select*from Old_Data_instructor;
+
+ID    NAME       DEPT_NAME                SALARY
+----- ---------- -------------------- ----------
+83821 Brandt     Comp. Sci.                92000
+
+
+
+3)CREATE OR REPLACE TRIGGER validate_instructor
+BEFORE INSERT OR UPDATE ON instructor
+FOR EACH ROW
+DECLARE
+    dept_budget department3.budget%TYPE;
+BEGIN
+    
+    IF NOT REGEXP_LIKE(:NEW.name, '^[A-Za-z]+$') THEN
+        RAISE_APPLICATION_ERROR(-20001, 'Name must contain only alphabets.');
+    END IF;
+
+    
+    IF :NEW.salary <= 0 THEN
+        RAISE_APPLICATION_ERROR(-20002, 'Salary must be positive and greater than zero.');
+    END IF;
+
+    -- Check 3: Salary should not exceed the department budget.
+    SELECT budget INTO dept_budget
+    FROM department3
+    WHERE dept_name = :NEW.dept_name;
+
+    IF :NEW.salary > dept_budget THEN
+        RAISE_APPLICATION_ERROR(-20003, 'Salary exceeds the department budget.');
+    END IF;
+END;
+/
+
+
+
+4)CREATE OR REPLACE TRIGGER audit_client_master
+BEFORE UPDATE OR DELETE ON Client_master
+FOR EACH ROW
+BEGIN
+    -- Insert the old record details into the audit table
+    IF DELETING THEN
+        INSERT INTO auditclient (
+            client_no, name, bal_due, operation, userid, opdate
+        )
+        VALUES (
+            :OLD.client_no, -- Old client number
+            :OLD.name, -- Old name
+            :OLD.bal_due, -- Old balance due
+            'DELETE', -- Specify the operation type
+            USER, -- Current user performing the operation
+            SYSDATE -- Current date and time
+        );
+    ELSIF UPDATING THEN
+        INSERT INTO auditclient (
+            client_no, name, bal_due, operation, userid, opdate
+        )
+        VALUES (
+            :OLD.client_no, -- Old client number
+            :OLD.name, -- Old name
+            :OLD.bal_due, -- Old balance due
+            'UPDATE', -- Specify the operation type
+            USER, -- Current user performing the operation
+            SYSDATE -- Current date and time
+        );
+    END IF;
+END;
+/
+
+CREATE TABLE auditclient (
+    client_no NUMBER(5),
+    name VARCHAR(20),
+    bal_due NUMERIC(8,2),
+    operation VARCHAR(10), -- Type of operation: 'DELETE' or 'UPDATE'
+    userid VARCHAR(30), -- The user performing the operation
+    opdate DATE -- The date and time of the operation
+);
+
+
+-- Create the Client_master table
+CREATE TABLE Client_master (
+    Client_no NUMBER(5),
+    name VARCHAR(20),
+    address VARCHAR(40),
+    Bal_due NUMERIC(8,2)
+);
+
+-- Insert 5 records into the Client_master table
+INSERT INTO Client_master (Client_no, name, address, Bal_due)
+VALUES (10001, 'Alice', '123 Maple St', 1250.50);
+
+INSERT INTO Client_master (Client_no, name, address, Bal_due)
+VALUES (10002, 'Bob', '456 Oak Ave', 890.00);
+
+INSERT INTO Client_master (Client_no, name, address, Bal_due)
+VALUES (10003, 'Charlie', '789 Pine Rd', 450.75);
+
+INSERT INTO Client_master (Client_no, name, address, Bal_due)
+VALUES (10004, 'Diana', '321 Birch Blvd', 2300.00);
+
+INSERT INTO Client_master (Client_no, name, address, Bal_due)
+VALUES (10005, 'Eve', '654 Cedar Dr', 150.20);
+
+
+
+
+
+
