@@ -1,0 +1,76 @@
+CREATE TABLE Caretaker (
+    C_id INT PRIMARY KEY IDENTITY(100, 1),
+    gender VARCHAR(10),
+    age INT CHECK (age > 0),
+    availability BOOLEAN,
+    status VARCHAR(50) CHECK (status IN ('pending', 'approved', 'declined'))
+);
+
+
+CREATE TABLE Customer (
+    ID INT PRIMARY KEY IDENTITY(1000, 1),
+    name VARCHAR(100) NOT NULL,
+    Email VARCHAR(100) UNIQUE NOT NULL,
+    Password VARCHAR(100) NOT NULL,
+    Phone_number VARCHAR(15) UNIQUE NOT NULL
+);
+
+
+CREATE TABLE Language (
+    C_id INT,
+    language_spoken VARCHAR(100),
+    PRIMARY KEY (C_id, language_spoken),
+    FOREIGN KEY (C_id) REFERENCES Caretaker(C_id) ON DELETE CASCADE
+);
+
+CREATE TABLE Specialization (
+    Specialization_Name VARCHAR(100) PRIMARY KEY,
+    Monthly_Salary NUMERIC(10, 2) CHECK (Monthly_Salary >= 0),
+    Hourly_Rate NUMERIC(10, 2) CHECK (Hourly_Salary >= 0)
+);
+
+CREATE TABLE Provides (
+    Specialization_Name VARCHAR(100),
+    C_id INT,
+    PRIMARY KEY (Specialization_Name, C_id),
+    FOREIGN KEY (Specialization_Name) REFERENCES Specialization(Specialization_Name) ON DELETE CASCADE,
+    FOREIGN KEY (C_id) REFERENCES Caretaker(C_id) ON DELETE CASCADE
+);
+
+CREATE TABLE Books_PT (
+    Booking_id INT PRIMARY KEY,
+    C_id INT,
+    Date_of_booking DATE NOT NULL,
+    Time_period TIME NOT NULL,
+    Specialization_name VARCHAR(100),
+    Hours_worked INT CHECK (Hours_worked > 0),
+    Start_date DATE NOT NULL,
+    End_date DATE NOT NULL,
+    FOREIGN KEY (C_id) REFERENCES Caretaker(C_id) ON DELETE SET NULL,
+    FOREIGN KEY (specialization_name) REFERENCES Specialization(Specialization_Name) ON DELETE SET NULL
+);
+
+CREATE TABLE Full_Time (
+    C_id INT,
+    ID INT,
+    Booking_id INT,
+    Start_date DATE NOT NULL,
+    Specialization_name VARCHAR(100),
+    Date_of_booking DATE NOT NULL,
+    Time_period TIME NOT NULL,
+    PRIMARY KEY (C_id, ID, Booking_id),
+    FOREIGN KEY (C_id) REFERENCES Caretaker(C_id) ON DELETE CASCADE,
+    FOREIGN KEY (Booking_id) REFERENCES Books(PT_Booking_id) ON DELETE CASCADE,
+    FOREIGN KEY (Specialization_name) REFERENCES Specialization(Specialization_Name) ON DELETE SET NULL
+);
+
+CREATE TABLE Part_Time (
+    C_id INT PRIMARY KEY,
+    Max_Hours_Per_Day INT CHECK (Max_Hours_Per_Day > 0),
+    FOREIGN KEY (C_id) REFERENCES Caretaker(C_id) ON DELETE CASCADE
+);
+
+
+
+
+
