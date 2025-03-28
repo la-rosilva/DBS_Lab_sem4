@@ -51,7 +51,7 @@ CREATE TABLE Books_PT (
     FOREIGN KEY (specialization_name) REFERENCES Specialization(Specialization_Name) ON DELETE SET NULL
 );
 
-CREATE TABLE Full_Time (
+CREATE TABLE Books_FT (
     C_id INT,
     ID INT,
     Booking_id INT,
