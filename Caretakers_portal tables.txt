@@ -9,10 +9,10 @@ CREATE TABLE Caretaker (
 
 CREATE TABLE Customer (
     ID INT PRIMARY KEY IDENTITY(1000, 1),
-    name VARCHAR(100) NOT NULL,
+    name VARCHAR(100),
     Email VARCHAR(100) UNIQUE NOT NULL,
     Password VARCHAR(100) NOT NULL,
-    Phone_number VARCHAR(15) UNIQUE NOT NULL
+    Phone_number VARCHAR(15) UNIQUE
 );
 
 
